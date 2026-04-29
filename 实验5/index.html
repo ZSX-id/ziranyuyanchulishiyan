@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>灵犀 · 金融舆情分析智能体</title>
+    <link rel="stylesheet" href="css/index.css">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Markdown 渲染 -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- 代码高亮 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+</head>
+<body class="light-mode">
+<div class="app-root">
+
+    <!-- ===== 侧边栏：CoT 思考链路面板 ===== -->
+    <aside id="cotPanel" class="cot-panel">
+        <div class="cot-header">
+            <span class="cot-title"><i class="fas fa-brain"></i> 智能体思考链路</span>
+            <button id="cotClose" class="icon-btn" title="收起面板"><i class="fas fa-chevron-left"></i></button>
+        </div>
+        <div id="cotContent" class="cot-content">
+            <div class="cot-empty">
+                <i class="fas fa-robot" style="font-size:2.5rem;opacity:0.3;"></i>
+                <p>等待智能体开始思考…</p>
+            </div>
+        </div>
+        <!-- 统计摘要 -->
+        <div id="cotStats" class="cot-stats hidden">
+            <div class="stat-item">
+                <span class="stat-label">工具调用</span>
+                <span id="statToolCalls" class="stat-value">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">总耗时</span>
+                <span id="statTotalTime" class="stat-value">0ms</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Token 用量</span>
+                <span id="statTokens" class="stat-value">-</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ===== 主体区域 ===== -->
+    <div class="app-container" id="appContainer">
+
+        <!-- 头部导航栏 -->
+        <header class="app-header">
+            <div class="header-left">
+                <!-- CoT 展开按钮 (面板收起时显示) -->
+                <button id="cotToggle" class="icon-btn cot-toggle-btn" title="显示思考链路">
+                    <i class="fas fa-brain"></i>
+                    <span id="cotBadge" class="cot-badge hidden">0</span>
+                </button>
+                <div class="app-brand">
+                    <span class="brand-name">灵犀</span>
+                    <span class="brand-tag">金融舆情 Agent</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <button id="settingsBtn" class="icon-btn" title="设置 API Key">
+                    <i class="fas fa-key"></i>
+                </button>
+                <button id="themeToggle" class="icon-btn" aria-label="切换主题">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- 主内容 -->
+        <main class="main-content">
+            <!-- 首页欢迎区 -->
+            <section id="homeSection" class="home-section">
+                <div class="home-hero">
+                    <div class="hero-icon"><i class="fas fa-chart-line"></i></div>
+                    <h1 class="gradient-title">金融舆情分析智能体</h1>
+                    <p class="subtitle">基于 Function Calling 的自主分析 · 多工具协同 · 思考链路可视化</p>
+                </div>
+
+                <!-- 能力标签 -->
+                <div class="capability-chips">
+                    <span class="chip"><i class="fas fa-chart-bar"></i> 实时行情</span>
+                    <span class="chip"><i class="fas fa-newspaper"></i> 舆情搜索</span>
+                    <span class="chip"><i class="fas fa-brain"></i> 情感分析</span>
+                    <span class="chip"><i class="fas fa-file-alt"></i> 报告生成</span>
+                    <span class="chip"><i class="fas fa-bolt"></i> 异步并发</span>
+                </div>
+
+                <!-- 快捷示例卡片 -->
+                <div class="card-grid">
+                    <div class="card" data-prompt="分析贵州茅台(600519)近期股价走势和市场舆情，生成投资分析报告">
+                        <div class="card-icon" style="color:#f97316;"><i class="fas fa-wine-glass"></i></div>
+                        <span>茅台行情分析</span>
+                        <small>股价 + 舆情 + 报告</small>
+                    </div>
+                    <div class="card" data-prompt="搜索近期A股科技板块重大利好消息，分析市场情绪并生成报告">
+                        <div class="card-icon" style="color:#3b82f6;"><i class="fas fa-microchip"></i></div>
+                        <span>科技板块舆情</span>
+                        <small>新闻搜索 + 情感分析</small>
+                    </div>
+                    <div class="card" data-prompt="查询腾讯控股(00700)港股最新行情和资金流向，分析机构动向">
+                        <div class="card-icon" style="color:#10b981;"><i class="fas fa-chart-pie"></i></div>
+                        <span>腾讯港股分析</span>
+                        <small>行情 + 资金流向</small>
+                    </div>
+                    <div class="card" data-prompt="分析当前宏观经济环境对A股市场的影响，重点关注利率和通胀数据">
+                        <div class="card-icon" style="color:#ec4899;"><i class="fas fa-globe-asia"></i></div>
+                        <span>宏观经济分析</span>
+                        <small>宏观指标 + 市场影响</small>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 对话消息列表 -->
+            <section id="messageSection" class="message-section hidden">
+                <div id="messageList" class="message-list"></div>
+            </section>
+        </main>
+
+        <!-- 底部输入区 -->
+        <footer class="input-footer">
+            <!-- 当前 Agent 状态提示 -->
+            <div id="agentStatus" class="agent-status hidden">
+                <div class="agent-status-inner">
+                    <div class="spinner"></div>
+                    <span id="agentStatusText">智能体思考中…</span>
+                </div>
+            </div>
+
+            <!-- 图片预览 -->
+            <div id="previewContainer" class="preview-container hidden">
+                <div class="preview-item">
+                    <img id="imagePreview" src="" alt="预览">
+                    <button id="removeImageBtn" class="remove-image"><i class="fas fa-times"></i></button>
+                </div>
+            </div>
+
+            <div class="input-wrapper">
+                <button id="uploadBtn" class="icon-btn" type="button" title="上传图片">
+                    <i class="fas fa-image"></i>
+                </button>
+                <input type="file" id="fileInput" accept="image/*" hidden>
+                <textarea id="userInput" rows="1" placeholder="向灵犀提问… 可询问股票行情、舆情分析、市场报告等 (Enter 发送)"></textarea>
+                <div class="action-buttons">
+                    <button id="sendBtn" class="send-btn hidden" title="发送"><i class="fas fa-paper-plane"></i></button>
+                    <button id="stopBtn" class="stop-btn hidden" title="停止生成"><i class="fas fa-stop"></i></button>
+                    <button id="clearBtn" class="icon-btn" title="清除对话"><i class="fas fa-trash-can"></i></button>
+                </div>
+            </div>
+            <div class="input-hint">
+                <i class="fas fa-info-circle"></i> 智能体将自主规划步骤、调用工具，并在左侧面板实时展示思考过程
+            </div>
+        </footer>
+    </div>
+</div>
+
+<!-- ===== API Key 设置弹窗 ===== -->
+<div id="settingsModal" class="modal-overlay hidden">
+    <div class="modal">
+        <div class="modal-header">
+            <h3><i class="fas fa-key"></i> API 配置</h3>
+            <button id="modalClose" class="icon-btn"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <label>阿里云百炼 API Key</label>
+            <input type="password" id="apiKeyInput" placeholder="sk-xxxxxxxxxxxxxxxx" />
+            <p class="modal-hint">API Key 仅存储在本地 localStorage，不会上传到服务器</p>
+            <label style="margin-top:12px;">Agent 模式</label>
+            <select id="agentModeSelect">
+                <option value="financial">金融舆情分析模式</option>
+                <option value="research">学术研究调研模式</option>
+                <option value="general">通用智能助手模式</option>
+            </select>
+            <label style="margin-top:12px;">最大工具调用轮次</label>
+            <input type="number" id="maxIterInput" min="1" max="10" value="5" />
+        </div>
+        <div class="modal-footer">
+            <button id="saveSettings" class="btn-primary">保存设置</button>
+        </div>
+    </div>
+</div>
+
+<script src="js/tools.js"></script>
+<script src="js/agent.js"></script>
+<script src="js/index.js"></script>
+</body>
+</html>
